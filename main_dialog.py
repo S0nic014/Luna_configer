@@ -5,18 +5,21 @@ import pymel.api as pma
 import pymel.core as pm
 from shiboken2 import getCppPointer
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+
 from Luna import Logger
+from Luna import Config
+from Luna_configer import pages
+from Luna.utils import pysideFn
+reload(pages)
 
 
 class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
     WINDOW_TITLE = "Luna configuaration"
     UI_NAME = "LunaConfigManager"
-    UI_SCRIPT = "from Luna.tools import configManager\nconfigManager.MainDialog()"
+    UI_SCRIPT = "import Luna_configer\nLuna_configer.MainDialog()"
     UI_INSTANCE = None
     MINIMUM_SIZE = [400, 500]
-
-    DEFAULT_SETTINGS = {}
 
     @classmethod
     def display(cls):
@@ -47,19 +50,23 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
             pma.MQtUtil.addWidgetToMayaLayout(widgetPtr, workspaceControlPtr)
 
         # UI setup
-        self.configs = self.load_configs()
         self.create_actions()
         self.create_menu_bar()
         self.create_widgets()
         self.create_layouts()
         self.create_connections()
+        self.update_configs()
 
     def create_actions(self):
         self.reset_configs_action = QtWidgets.QAction("Restore default config", self)
         self.documentation_action = QtWidgets.QAction("Documentation", self)
         self.documentation_action.setIcon(QtGui.QIcon(":help.png"))
+        self.update_configs_action = QtWidgets.QAction("", self)
+        self.update_configs_action.setIcon(QtGui.QIcon(pysideFn.getIcon("refresh.png")))
 
     def create_menu_bar(self):
+        # self.menuBar.setCornerWidget(self.right_menu_bar)
+        # self.menuBar.addAction(self.update_configs_action)
         # Edit menu
         edit_menu = QtWidgets.QMenu("&Edit")
         edit_menu.addAction(self.reset_configs_action)
@@ -71,8 +78,33 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.menuBar.addMenu(edit_menu)
         self.menuBar.addMenu(help_menu)
 
+        # Right menubar
+        self.right_menu_bar = QtWidgets.QMenuBar(self.menuBar)
+        self.right_menu_bar.addAction(self.update_configs_action)
+        self.menuBar.setCornerWidget(self.right_menu_bar, QtCore.Qt.TopRightCorner)
+
     def create_widgets(self):
+        self.stack_wgt = QtWidgets.QStackedWidget()
+        self.category_list = QtWidgets.QListWidget()
+        self.category_list.setMaximumWidth(180)
         self.config_splitter = QtWidgets.QSplitter()
+        self.config_splitter.addWidget(self.category_list)
+        self.config_splitter.addWidget(self.stack_wgt)
+
+        # Create pages
+        self.dev_page = pages.DeveloperPage()
+
+        # Populate stack
+        self.stack_wgt.addWidget(self.dev_page)
+
+        # Populate category
+        for child in self.stack_wgt.children():
+            if isinstance(child, pages.PageWidget):
+                category_item = QtWidgets.QListWidgetItem()
+                category_item.setText(child.category_name)
+                self.category_list.addItem(category_item)
+
+        # Action buttons
         self.save_button = QtWidgets.QPushButton("Save")
         self.save_button.setMinimumWidth(90)
         self.cancel_button = QtWidgets.QPushButton("Cancel")
@@ -90,18 +122,22 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.main_layout.addLayout(self.buttons_layout)
 
     def create_connections(self):
+        self.category_list.currentRowChanged.connect(self.stack_wgt.setCurrentIndex)
+        self.reset_configs_action.triggered.connect(Config.reset)
+        self.update_configs_action.triggered.connect(self.update_configs)
         self.save_button.clicked.connect(self.save_configs)
-        self.cancel_button.clicked.connect(self.hide)
-
-    def load_configs(self):
-        Logger.debug("TODO: load_configs")
+        self.cancel_button.clicked.connect(self.close)
 
     def save_configs(self):
-        Logger.debug("TODO: save_configs")
+        for child in self.stack_wgt.children():
+            if isinstance(child, pages.PageWidget):
+                child.save_config()
         self.hide()
 
     def update_configs(self):
-        Logger.debug("TODO: update_configs")
+        for child in self.stack_wgt.children():
+            if isinstance(child, pages.PageWidget):
+                child.load_config()
 
 
 if __name__ == "__main__":
