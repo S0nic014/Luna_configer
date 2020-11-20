@@ -39,6 +39,11 @@ class DeveloperPage(PageWidget):
         self.testing_delete_files_cb = QtWidgets.QCheckBox("Delete test files")
         self.testing_delete_dirs_cb = QtWidgets.QCheckBox("Delete test dirs")
 
+        self.misc_grp = QtWidgets.QGroupBox("Misc")
+        self.misc_pyport_field = QtWidgets.QSpinBox()
+        self.misc_pyport_field.setMinimum(1024)
+        self.misc_pyport_field.setMaximum(49151)
+
     def _create_layous(self):
         logging_layout = QtWidgets.QFormLayout()
         self.logging_grp.setLayout(logging_layout)
@@ -52,20 +57,27 @@ class DeveloperPage(PageWidget):
         testing_layout.addWidget(self.testing_delete_files_cb)
         testing_layout.addWidget(self.testing_delete_dirs_cb)
 
+        misc_layout = QtWidgets.QFormLayout()
+        self.misc_grp.setLayout(misc_layout)
+        misc_layout.addRow("Python port: ", self.misc_pyport_field)
+
         self.main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.main_layout)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.addWidget(self.logging_grp)
         self.main_layout.addWidget(self.testing_grp)
+        self.main_layout.addWidget(self.misc_grp)
         self.main_layout.addStretch()
 
     def _create_connections(self):
         pass
 
-    def load_config(self):
-        Logger.debug("Developer page:: loading config...")
+    def load_config(self, config_dict=None):
+        Logger.debug("Developer page - loading config...")
         config_dict = Config.load()  # type:dict
+
         # Logging
+        Logger.set_level(config_dict.get(LunaVars.logging_level))
         self.logging_level_field.setCurrentText(Logger.get_level(name=1))
 
         # Testing
@@ -75,8 +87,11 @@ class DeveloperPage(PageWidget):
         self.testing_delete_files_cb.setChecked(config_dict.get(TestVars.delete_files))
         self.testing_delete_dirs_cb.setChecked(config_dict.get(TestVars.delete_dirs))
 
+        # Misc
+        self.misc_pyport_field.setValue(config_dict.get(LunaVars.command_port))
+
     def save_config(self):
-        Logger.debug("Developer page:: saving config....")
+        Logger.debug("Developer page - saving config...")
         new_config = {}
         # Logging
         Logger.set_level(self.logging_level_field.currentText())
@@ -89,6 +104,9 @@ class DeveloperPage(PageWidget):
         new_config[TestVars.delete_files] = self.testing_delete_files_cb.isChecked()
         new_config[TestVars.delete_dirs] = self.testing_delete_dirs_cb.isChecked()
 
+        # Misc
+        new_config[LunaVars.command_port] = self.misc_pyport_field.value()
+
         # Update config
         Config.update(new_config)
-        Logger.debug("Developer page :: saved config: {0}".format(new_config))
+        Logger.debug("Developer page - saved config: {0}".format(new_config))

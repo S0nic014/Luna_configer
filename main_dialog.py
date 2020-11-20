@@ -1,3 +1,4 @@
+import timeit
 from PySide2 import QtCore
 from PySide2 import QtWidgets
 from PySide2 import QtGui
@@ -8,46 +9,29 @@ from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 from Luna import Logger
 from Luna import Config
+from Luna import LunaVars
 from Luna_configer import pages
 from Luna.utils import pysideFn
 reload(pages)
+
+DEBUG = Logger.get_level() == 10
 
 
 class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
     WINDOW_TITLE = "Luna configuaration"
     UI_NAME = "LunaConfigManager"
-    UI_SCRIPT = "import Luna_configer\nLuna_configer.MainDialog()"
-    UI_INSTANCE = None
     MINIMUM_SIZE = [400, 500]
-
-    @classmethod
-    def display(cls):
-        if not cls.UI_INSTANCE:
-            cls.UI_INSTANCE = MainDialog()
-
-        if cls.UI_INSTANCE.isHidden():
-            cls.UI_INSTANCE.show(dockable=1, uiScript=cls.UI_SCRIPT)
-        else:
-            cls.UI_INSTANCE.raise_()
-            cls.UI_INSTANCE.activateWindow()
+    GEOMETRY = None
 
     def __init__(self):
         super(MainDialog, self).__init__()
 
         # Window adjustments
-        self.__class__.UI_INSTANCE = self
         self.setObjectName(self.__class__.UI_NAME)
         self.setWindowTitle(self.WINDOW_TITLE)
         self.setMinimumSize(*self.MINIMUM_SIZE)
         self.setMaximumHeight(600)
-
-        # Workspace control
-        self.workspaceControlName = "{0}WorkspaceControl".format(self.UI_NAME)
-        if pm.workspaceControl(self.workspaceControlName, q=1, ex=1):
-            workspaceControlPtr = long(pma.MQtUtil.findControl(self.workspaceControlName))
-            widgetPtr = long(getCppPointer(self)[0])
-            pma.MQtUtil.addWidgetToMayaLayout(widgetPtr, workspaceControlPtr)
 
         # UI setup
         self.create_actions()
@@ -57,6 +41,10 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.create_connections()
         self.update_configs()
 
+        # Load geo and show
+        self.restoreGeometry(MainDialog.GEOMETRY)
+        self.show()
+
     def create_actions(self):
         self.reset_configs_action = QtWidgets.QAction("Restore default config", self)
         self.documentation_action = QtWidgets.QAction("Documentation", self)
@@ -65,8 +53,6 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.update_configs_action.setIcon(QtGui.QIcon(pysideFn.getIcon("refresh.png")))
 
     def create_menu_bar(self):
-        # self.menuBar.setCornerWidget(self.right_menu_bar)
-        # self.menuBar.addAction(self.update_configs_action)
         # Edit menu
         edit_menu = QtWidgets.QMenu("&Edit")
         edit_menu.addAction(self.reset_configs_action)
@@ -132,23 +118,22 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         for child in self.stack_wgt.children():
             if isinstance(child, pages.PageWidget):
                 child.save_config()
-        self.hide()
+        self.close()
+        self.deleteLater()
 
     def update_configs(self):
+        start_time = timeit.default_timer()
         for child in self.stack_wgt.children():
             if isinstance(child, pages.PageWidget):
                 child.load_config()
+                Logger.debug("{0} page - loaded in: {1}s".format(child.category_name, timeit.default_timer() - start_time))
+        Logger.debug("Config load time: {0}s".format(timeit.default_timer() - start_time))
+
+    def closeEvent(self, event):
+        super(MainDialog, self).closeEvent(event)
+        MainDialog.GEOMETRY = self.saveGeometry()
 
 
 if __name__ == "__main__":
-    try:
-        if testTool and testTool.parent():  # noqa: F821
-            workspaceControlName = testTool.parent().objectName()  # noqa: F821
-
-            if pm.window(workspaceControlName, ex=1, q=1):
-                pm.deleteUI(workspaceControlName)
-    except Exception:
-        pass
-
     testTool = MainDialog()
-    testTool.show(dockable=1, uiScript=testTool.UI_SCRIPT)
+    testTool.show(dockable=0)
