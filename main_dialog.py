@@ -32,6 +32,8 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.setWindowTitle(self.WINDOW_TITLE)
         self.setMinimumSize(*self.MINIMUM_SIZE)
         self.setMaximumHeight(600)
+        # MacOSX window stay on top
+        self.setProperty("saveWindowPref", True)
 
         # UI setup
         self.create_actions()
@@ -49,8 +51,6 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.reset_configs_action = QtWidgets.QAction("Restore default config", self)
         self.documentation_action = QtWidgets.QAction("Documentation", self)
         self.documentation_action.setIcon(QtGui.QIcon(":help.png"))
-        self.update_configs_action = QtWidgets.QAction("", self)
-        self.update_configs_action.setIcon(QtGui.QIcon(pysideFn.getIcon("refresh.png")))
 
     def create_menu_bar(self):
         # Edit menu
@@ -64,12 +64,14 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.menuBar.addMenu(edit_menu)
         self.menuBar.addMenu(help_menu)
 
-        # Right menubar
-        self.right_menu_bar = QtWidgets.QMenuBar(self.menuBar)
-        self.right_menu_bar.addAction(self.update_configs_action)
-        self.menuBar.setCornerWidget(self.right_menu_bar, QtCore.Qt.TopRightCorner)
-
     def create_widgets(self):
+        # Top right button
+        self.reload_config_btn = QtWidgets.QPushButton()
+        self.reload_config_btn.setFlat(True)
+        self.reload_config_btn.setIcon(QtGui.QIcon(pysideFn.getIcon("refresh.png")))
+        self.menuBar.setCornerWidget(self.reload_config_btn, QtCore.Qt.TopRightCorner)
+
+        # Create stack, list widgets
         self.stack_wgt = QtWidgets.QStackedWidget()
         self.category_list = QtWidgets.QListWidget()
         self.category_list.setMaximumWidth(180)
@@ -108,9 +110,9 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.main_layout.addLayout(self.buttons_layout)
 
     def create_connections(self):
+        self.reload_config_btn.clicked.connect(self.update_configs)
         self.category_list.currentRowChanged.connect(self.stack_wgt.setCurrentIndex)
         self.reset_configs_action.triggered.connect(Config.reset)
-        self.update_configs_action.triggered.connect(self.update_configs)
         self.save_button.clicked.connect(self.save_configs)
         self.cancel_button.clicked.connect(self.close)
 
