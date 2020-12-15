@@ -34,6 +34,7 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.setMaximumHeight(600)
         # MacOSX window stay on top
         self.setProperty("saveWindowPref", True)
+        self.setWindowIcon(pysideFn.get_QIcon("config.svg"))
 
         # UI setup
         self.create_actions()
@@ -68,7 +69,7 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         # Top right button
         self.reload_config_btn = QtWidgets.QPushButton()
         self.reload_config_btn.setFlat(True)
-        self.reload_config_btn.setIcon(QtGui.QIcon(pysideFn.getIcon("refresh.png")))
+        self.reload_config_btn.setIcon(pysideFn.get_QIcon("refresh.png"))
         self.menuBar.setCornerWidget(self.reload_config_btn, QtCore.Qt.TopRightCorner)
 
         # Create stack, list widgets
