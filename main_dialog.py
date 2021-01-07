@@ -61,16 +61,16 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         help_menu = QtWidgets.QMenu("Help")
         help_menu.addAction(self.documentation_action)
         # Menubar
-        self.menuBar = QtWidgets.QMenuBar()
-        self.menuBar.addMenu(edit_menu)
-        self.menuBar.addMenu(help_menu)
+        self.menu_bar = QtWidgets.QMenuBar()
+        self.menu_bar.addMenu(edit_menu)
+        self.menu_bar.addMenu(help_menu)
 
     def create_widgets(self):
         # Top right button
         self.reload_config_btn = QtWidgets.QPushButton()
         self.reload_config_btn.setFlat(True)
         self.reload_config_btn.setIcon(pysideFn.get_QIcon("refresh.png"))
-        self.menuBar.setCornerWidget(self.reload_config_btn, QtCore.Qt.TopRightCorner)
+        self.menu_bar.setCornerWidget(self.reload_config_btn, QtCore.Qt.TopRightCorner)
 
         # Create stack, list widgets
         self.stack_wgt = QtWidgets.QStackedWidget()
@@ -106,7 +106,7 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.buttons_layout.addWidget(self.cancel_button)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.setMenuBar(self.menuBar)
+        self.main_layout.setMenuBar(self.menu_bar)
         self.main_layout.addWidget(self.config_splitter)
         self.main_layout.addLayout(self.buttons_layout)
 
