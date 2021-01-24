@@ -14,8 +14,6 @@ from Luna_configer import pages
 from Luna.utils import pysideFn
 reload(pages)
 
-DEBUG = Logger.get_level() == 10
-
 
 class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
@@ -26,6 +24,8 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
     def __init__(self):
         super(MainDialog, self).__init__()
+        # Load config
+        self.config = Config.load()
 
         # Window adjustments
         self.setObjectName(self.__class__.UI_NAME)
@@ -81,13 +81,17 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.config_splitter.addWidget(self.stack_wgt)
 
         # Create pages
-        self.dev_page = pages.DeveloperPage()
+        self.dev_page = pages.DeveloperPage(self.config)
+        self.other_page = pages.OtherPage(self.config)
 
         # Populate stack
         self.stack_wgt.addWidget(self.dev_page)
+        self.stack_wgt.addWidget(self.other_page)
 
         # Populate category
-        for child in self.stack_wgt.children():
+        stack_children = self.stack_wgt.children()  # type: list
+        stack_children.reverse()
+        for child in stack_children:
             if isinstance(child, pages.PageWidget):
                 category_item = QtWidgets.QListWidgetItem()
                 category_item.setText(child.category_name)
