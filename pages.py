@@ -110,8 +110,7 @@ class DeveloperPage(PageWidget):
         new_config[LunaVars.command_port] = self.misc_pyport_field.value()
 
         # Update config
-        self.config_dict.update(new_config)
-        Config.update(self.config_dict)
+        Config.update(new_config)
         Logger.debug("Developer page - saved config: {0}".format(new_config))
 
 
@@ -157,8 +156,7 @@ class OtherPage(PageWidget):
         new_config[HudVars.section] = self.hud_section_field.value()
         new_config[HudVars.block] = self.hud_block_field.value()
 
-        self.config_dict.update(new_config)
-        Config.update(self.config_dict)
+        Config.update(new_config)
         Logger.debug("Other page - saved config: {0}".format(new_config))
         # Hud recreate
         Logger.info("Updating HUD...")
