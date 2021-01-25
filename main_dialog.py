@@ -24,9 +24,6 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
     def __init__(self):
         super(MainDialog, self).__init__()
-        # Load config
-        self.config = Config.load()
-
         # Window adjustments
         self.setObjectName(self.__class__.UI_NAME)
         self.setWindowTitle(self.WINDOW_TITLE)
@@ -81,8 +78,8 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         self.config_splitter.addWidget(self.stack_wgt)
 
         # Create pages
-        self.dev_page = pages.DeveloperPage(self.config)
-        self.other_page = pages.OtherPage(self.config)
+        self.dev_page = pages.DeveloperPage()
+        self.other_page = pages.OtherPage()
 
         # Populate stack
         self.stack_wgt.addWidget(self.dev_page)

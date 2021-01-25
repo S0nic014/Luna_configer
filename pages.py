@@ -10,10 +10,9 @@ reload(shared_widgets)
 
 
 class PageWidget(QtWidgets.QWidget):
-    def __init__(self, config_dict, parent=None, category_name="Category"):
+    def __init__(self, parent=None, category_name="Category"):
         super(PageWidget, self).__init__(parent)
         self.category_name = category_name
-        self.config_dict = config_dict  # type: dict
 
     def load_config(self):
         raise NotImplementedError
@@ -23,8 +22,8 @@ class PageWidget(QtWidgets.QWidget):
 
 
 class DeveloperPage(PageWidget):
-    def __init__(self, config_dict, parent=None, category_name="Developer"):
-        super(DeveloperPage, self).__init__(config_dict, parent=parent, category_name=category_name)
+    def __init__(self, parent=None, category_name="Developer"):
+        super(DeveloperPage, self).__init__(parent=parent, category_name=category_name)
 
         self._create_widgets()
         self._create_layous()
@@ -77,20 +76,21 @@ class DeveloperPage(PageWidget):
 
     def load_config(self):
         Logger.debug("Developer page - loading config...")
+        config_dict = Config.load()
 
         # Logging
-        Logger.set_level(self.config_dict.get(LunaVars.logging_level))
+        Logger.set_level(config_dict.get(LunaVars.logging_level))
         self.logging_level_field.setCurrentText(Logger.get_level(name=1))
 
         # Testing
-        self.testing_temp_dir.line_edit.setText(self.config_dict.get(TestVars.temp_dir))
-        self.testing_buffer_output_cb.setChecked(self.config_dict.get(TestVars.buffer_output))
-        self.testing_new_file_cb.setChecked(self.config_dict.get(TestVars.new_file))
-        self.testing_delete_files_cb.setChecked(self.config_dict.get(TestVars.delete_files))
-        self.testing_delete_dirs_cb.setChecked(self.config_dict.get(TestVars.delete_dirs))
+        self.testing_temp_dir.line_edit.setText(config_dict.get(TestVars.temp_dir))
+        self.testing_buffer_output_cb.setChecked(config_dict.get(TestVars.buffer_output))
+        self.testing_new_file_cb.setChecked(config_dict.get(TestVars.new_file))
+        self.testing_delete_files_cb.setChecked(config_dict.get(TestVars.delete_files))
+        self.testing_delete_dirs_cb.setChecked(config_dict.get(TestVars.delete_dirs))
 
         # Misc
-        self.misc_pyport_field.setValue(self.config_dict.get(LunaVars.command_port))
+        self.misc_pyport_field.setValue(config_dict.get(LunaVars.command_port))
 
     def save_config(self):
         Logger.debug("Developer page - saving config...")
@@ -115,8 +115,8 @@ class DeveloperPage(PageWidget):
 
 
 class OtherPage(PageWidget):
-    def __init__(self, config_dict, parent=None, category_name="Other"):
-        super(OtherPage, self).__init__(config_dict, parent=parent, category_name=category_name)
+    def __init__(self, parent=None, category_name="Other"):
+        super(OtherPage, self).__init__(parent=parent, category_name=category_name)
 
         self._create_widgets()
         self._create_layous()
@@ -144,9 +144,10 @@ class OtherPage(PageWidget):
 
     def load_config(self):
         Logger.debug("Other page - loading config...")
+        config_dict = Config.load()
         # HUD
-        self.hud_section_field.setValue(self.config_dict.get(HudVars.section))
-        self.hud_block_field.setValue(self.config_dict.get(HudVars.block))
+        self.hud_section_field.setValue(config_dict.get(HudVars.section))
+        self.hud_block_field.setValue(config_dict.get(HudVars.block))
 
     def save_config(self):
         Logger.debug("Other page - saving config...")
