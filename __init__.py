@@ -1,1 +1,1 @@
-from Luna_configer.main_dialog import MainDialog
+from luna_configer.main_dialog import MainDialog

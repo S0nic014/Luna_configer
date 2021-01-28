@@ -7,18 +7,18 @@ import pymel.core as pm
 from shiboken2 import getCppPointer
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
-from Luna import Logger
-from Luna import Config
-from Luna import LunaVars
-from Luna_configer import pages
-from Luna.utils import pysideFn
+from luna import Logger
+from luna import Config
+from luna import lunaVars
+from luna_configer import pages
+from luna.utils import pysideFn
 reload(pages)
 
 
 class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
-    WINDOW_TITLE = "Luna configuaration"
-    UI_NAME = "LunaConfigManager"
+    WINDOW_TITLE = "luna configuaration"
+    UI_NAME = "lunaConfigManager"
     MINIMUM_SIZE = [400, 500]
     GEOMETRY = None
 
