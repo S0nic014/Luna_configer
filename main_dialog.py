@@ -2,14 +2,11 @@ import timeit
 from PySide2 import QtCore
 from PySide2 import QtWidgets
 from PySide2 import QtGui
-import pymel.api as pma
-import pymel.core as pm
-from shiboken2 import getCppPointer
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 from luna import Logger
 from luna import Config
-from luna import lunaVars
+from luna import LunaVars
 from luna_configer import pages
 from luna.utils import pysideFn
 reload(pages)

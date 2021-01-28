@@ -1,7 +1,7 @@
 from PySide2 import QtWidgets
 from luna import Logger
 from luna import Config
-from luna import lunaVars
+from luna import LunaVars
 from luna import TestVars
 from luna import HudVars
 from luna.interface import shared_widgets
@@ -79,7 +79,7 @@ class DeveloperPage(PageWidget):
         config_dict = Config.load()
 
         # Logging
-        Logger.set_level(config_dict.get(lunaVars.logging_level))
+        Logger.set_level(config_dict.get(LunaVars.logging_level))
         self.logging_level_field.setCurrentText(Logger.get_level(name=1))
 
         # Testing
@@ -90,14 +90,14 @@ class DeveloperPage(PageWidget):
         self.testing_delete_dirs_cb.setChecked(config_dict.get(TestVars.delete_dirs))
 
         # Misc
-        self.misc_pyport_field.setValue(config_dict.get(lunaVars.command_port))
+        self.misc_pyport_field.setValue(config_dict.get(LunaVars.command_port))
 
     def save_config(self):
         Logger.debug("Developer page - saving config...")
         new_config = {}
         # Logging
         Logger.set_level(self.logging_level_field.currentText())
-        new_config[lunaVars.logging_level] = Logger.get_level()
+        new_config[LunaVars.logging_level] = Logger.get_level()
 
         # Testing
         new_config[TestVars.temp_dir] = self.testing_temp_dir.line_edit.text()
@@ -107,7 +107,7 @@ class DeveloperPage(PageWidget):
         new_config[TestVars.delete_dirs] = self.testing_delete_dirs_cb.isChecked()
 
         # Misc
-        new_config[lunaVars.command_port] = self.misc_pyport_field.value()
+        new_config[LunaVars.command_port] = self.misc_pyport_field.value()
 
         # Update config
         Config.update(new_config)
