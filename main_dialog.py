@@ -14,7 +14,7 @@ reload(pages)
 
 class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
-    WINDOW_TITLE = "luna configuaration"
+    WINDOW_TITLE = "Luna configuration"
     UI_NAME = "lunaConfigManager"
     MINIMUM_SIZE = [400, 500]
     GEOMETRY = None
