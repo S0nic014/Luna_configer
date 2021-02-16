@@ -2,25 +2,34 @@ import timeit
 from PySide2 import QtCore
 from PySide2 import QtWidgets
 from PySide2 import QtGui
-from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 from luna import Logger
 from luna import Config
-from luna import LunaVars
 from luna_configer import pages
 from luna.utils import pysideFn
 reload(pages)
 
 
-class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
+class MainDialog(QtWidgets.QDialog):
 
     WINDOW_TITLE = "Luna configuration"
     UI_NAME = "lunaConfigManager"
     MINIMUM_SIZE = [400, 500]
     GEOMETRY = None
+    INSTANCE = None
+
+    @classmethod
+    def display(cls):
+        if not cls.INSTANCE:
+            cls.INSTANCE = cls()  # type: MainDialog
+        if cls.INSTANCE.isHidden():
+            cls.INSTANCE.show()
+        else:
+            cls.INSTANCE.raise_()
+            cls.INSTANCE.activateWindow()
 
     def __init__(self):
-        super(MainDialog, self).__init__()
+        super(MainDialog, self).__init__(parent=pysideFn.maya_main_window())
         # Window adjustments
         self.setObjectName(self.__class__.UI_NAME)
         self.setWindowTitle(self.WINDOW_TITLE)
@@ -40,7 +49,6 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
         # Load geo and show
         self.restoreGeometry(MainDialog.GEOMETRY)
-        self.show()
 
     def create_actions(self):
         self.reset_configs_action = QtWidgets.QAction("Restore default config", self)
@@ -136,5 +144,4 @@ class MainDialog(MayaQWidgetDockableMixin, QtWidgets.QWidget):
 
 
 if __name__ == "__main__":
-    testTool = MainDialog()
-    testTool.show(dockable=0)
+    MainDialog.display()
