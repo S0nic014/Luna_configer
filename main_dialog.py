@@ -16,7 +16,7 @@ class MainDialog(QtWidgets.QDialog):
     UI_NAME = "lunaConfigManager"
     MINIMUM_SIZE = [400, 500]
     GEOMETRY = None
-    INSTANCE = None
+    INSTANCE = None  # type: MainDialog
 
     @classmethod
     def display(cls):
@@ -27,6 +27,13 @@ class MainDialog(QtWidgets.QDialog):
         else:
             cls.INSTANCE.raise_()
             cls.INSTANCE.activateWindow()
+
+    @classmethod
+    def hide_and_delete(cls):
+        if not cls.INSTANCE:
+            return
+        cls.INSTANCE.hide()
+        cls.INSTANCE.deleteLater()
 
     def __init__(self):
         super(MainDialog, self).__init__(parent=pysideFn.maya_main_window())
