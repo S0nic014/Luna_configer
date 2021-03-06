@@ -1,11 +1,9 @@
 from PySide2 import QtWidgets
 from PySide2 import QtCore
 import luna
-from luna import Logger
-from luna import Config
-from luna.interface import shared_widgets
-from luna.interface import hud
-reload(shared_widgets)
+import luna.interface.shared_widgets as shared_widgets
+import luna.interface.hud as hud
+import luna.utils.devFn as devFn
 
 
 class PageWidget(QtWidgets.QWidget):
@@ -51,9 +49,7 @@ class DeveloperPage(PageWidget):
         self.testing_delete_dirs_cb = QtWidgets.QCheckBox("Delete test dirs")
 
         self.misc_grp = QtWidgets.QGroupBox("Misc")
-        self.misc_pyport_field = QtWidgets.QSpinBox()
-        self.misc_pyport_field.setMinimum(1024)
-        self.misc_pyport_field.setMaximum(49151)
+        self.misc_pyport_field = shared_widgets.NumericFieldWidget("Python port:", default_value=-1, min_value=-1, max_value=49151,)
 
     def create_layouts(self):
         super(DeveloperPage, self).create_layouts()
@@ -71,7 +67,7 @@ class DeveloperPage(PageWidget):
 
         misc_layout = QtWidgets.QFormLayout()
         self.misc_grp.setLayout(misc_layout)
-        misc_layout.addRow("Python port: ", self.misc_pyport_field)
+        misc_layout.addRow(self.misc_pyport_field)
 
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.addWidget(self.logging_grp)
@@ -83,29 +79,29 @@ class DeveloperPage(PageWidget):
         pass
 
     def load_config(self):
-        Logger.debug("Developer page - loading config...")
-        config_dict = Config.load()
+        luna.Logger.debug("Developer page - loading config...")
+        config_dict = luna.Config.load()
 
         # Logging
-        Logger.set_level(config_dict.get(luna.LunaVars.logging_level))
-        self.logging_level_field.setCurrentText(Logger.get_level(name=1))
+        luna.Logger.set_level(config_dict.get(luna.LunaVars.logging_level))
+        self.logging_level_field.setCurrentText(luna.Logger.get_level(name=1))
 
         # Testing
-        self.testing_temp_dir.line_edit.setText(config_dict.get(luna.TestVars.temp_dir))
-        self.testing_buffer_output_cb.setChecked(config_dict.get(luna.TestVars.buffer_output))
-        self.testing_new_file_cb.setChecked(config_dict.get(luna.TestVars.new_file))
-        self.testing_delete_files_cb.setChecked(config_dict.get(luna.TestVars.delete_files))
-        self.testing_delete_dirs_cb.setChecked(config_dict.get(luna.TestVars.delete_dirs))
+        self.testing_temp_dir.line_edit.setText(config_dict.get(luna.TestVars.temp_dir, ""))
+        self.testing_buffer_output_cb.setChecked(config_dict.get(luna.TestVars.buffer_output, True))
+        self.testing_new_file_cb.setChecked(config_dict.get(luna.TestVars.new_file, True))
+        self.testing_delete_files_cb.setChecked(config_dict.get(luna.TestVars.delete_files, True))
+        self.testing_delete_dirs_cb.setChecked(config_dict.get(luna.TestVars.delete_dirs, True))
 
         # Misc
-        self.misc_pyport_field.setValue(config_dict.get(luna.LunaVars.command_port))
+        self.misc_pyport_field.set_value(config_dict.get(luna.LunaVars.command_port, -1))
 
     def save_config(self):
-        Logger.debug("Developer page - saving config...")
+        luna.Logger.debug("Developer page - saving config...")
         new_config = {}
         # Logging
-        Logger.set_level(self.logging_level_field.currentText())
-        new_config[luna.LunaVars.logging_level] = Logger.get_level()
+        luna.Logger.set_level(self.logging_level_field.currentText())
+        new_config[luna.LunaVars.logging_level] = luna.Logger.get_level()
 
         # Testing
         new_config[luna.TestVars.temp_dir] = self.testing_temp_dir.line_edit.text()
@@ -117,9 +113,12 @@ class DeveloperPage(PageWidget):
         # Misc
         new_config[luna.LunaVars.command_port] = self.misc_pyport_field.value()
 
+        # Open command port
+        devFn.open_port(self.misc_pyport_field.value())
+
         # Update config
-        Config.update(new_config)
-        Logger.debug("Developer page - saved config: {0}".format(new_config))
+        luna.Config.update(new_config)
+        luna.Logger.debug("Developer page - saved config: {0}".format(new_config))
 
 
 class GeneralPage(PageWidget):
@@ -162,16 +161,16 @@ class GeneralPage(PageWidget):
         pass
 
     def load_config(self):
-        Logger.debug("General page - loading config...")
-        config_dict = Config.load()
+        luna.Logger.debug("General page - loading config...")
+        config_dict = luna.Config.load()
         # HUD
-        self.hud_section_field.set_value(config_dict.get(luna.HudVars.section))
-        self.hud_block_field.set_value(config_dict.get(luna.HudVars.block))
-        self.marking_mode_combobox.setCurrentIndex(config_dict.get(luna.LunaVars.marking_menu_mode))
+        self.hud_section_field.set_value(config_dict.get(luna.HudVars.section, 7))
+        self.hud_block_field.set_value(config_dict.get(luna.HudVars.block, 5))
+        self.marking_mode_combobox.setCurrentIndex(config_dict.get(luna.LunaVars.marking_menu_mode, 1))
         self.unreal_project.line_edit.setText(config_dict.get(luna.UnrealVars.project, ""))
 
     def save_config(self):
-        Logger.debug("General page - saving config...")
+        luna.Logger.debug("General page - saving config...")
         new_config = {}
 
         # HUD
@@ -180,10 +179,10 @@ class GeneralPage(PageWidget):
         new_config[luna.UnrealVars.project] = self.unreal_project.line_edit.text()
         new_config[luna.LunaVars.marking_menu_mode] = self.marking_mode_combobox.currentIndex()
 
-        Config.update(new_config)
-        Logger.debug("General page - saved config: {0}".format(new_config))
+        luna.Config.update(new_config)
+        luna.Logger.debug("General page - saved config: {0}".format(new_config))
         # Hud recreate
-        Logger.info("Updating HUD...")
+        luna.Logger.info("Updating HUD...")
         hud.LunaHUD.create()
 
 
@@ -238,8 +237,8 @@ class RigPage(PageWidget):
         self.naming_templates_table.customContextMenuRequested.connect(self.naming_table_context_menu)
 
     def load_config(self):
-        Logger.debug("General page - loading config...")
-        config_dict = Config.load()
+        luna.Logger.debug("General page - loading config...")
+        config_dict = luna.Config.load()
         # Naming
         default_template_dict = {"default": "{side}_{name}_{suffix}"}
         self.update_templates_table(config_dict.get(luna.NamingVars.templates_dict, default_template_dict))
@@ -251,7 +250,7 @@ class RigPage(PageWidget):
         self.file_formats_nglayers_combobox.setCurrentText(config_dict.get(luna.RigVars.nglayers_export_format, "pickle"))
 
     def save_config(self):
-        Logger.debug("Rig page - saving config...")
+        luna.Logger.debug("Rig page - saving config...")
         new_config = {}
         new_config[luna.NamingVars.current_template] = self.naming_current_template.line_edit.text()
         new_config[luna.NamingVars.templates_dict] = self.get_naming_templates_dict()
@@ -260,8 +259,8 @@ class RigPage(PageWidget):
         new_config[luna.RigVars.skin_export_format] = self.file_formats_skin_combobox.currentText()
         new_config[luna.RigVars.nglayers_export_format] = self.file_formats_nglayers_combobox.currentText()
 
-        Config.update(new_config)
-        Logger.debug("Rig page - saved config: {0}".format(new_config))
+        luna.Config.update(new_config)
+        luna.Logger.debug("Rig page - saved config: {0}".format(new_config))
 
     def update_templates_table(self, templates_dict):
         self.naming_templates_table.setRowCount(0)

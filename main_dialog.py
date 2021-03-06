@@ -22,6 +22,7 @@ class MainDialog(QtWidgets.QDialog):
     def display(cls):
         if not cls.INSTANCE:
             cls.INSTANCE = cls()  # type: MainDialog
+        cls.INSTANCE.restoreGeometry(cls.GEOMETRY)
         if cls.INSTANCE.isHidden():
             cls.INSTANCE.show()
         else:
@@ -29,10 +30,10 @@ class MainDialog(QtWidgets.QDialog):
             cls.INSTANCE.activateWindow()
 
     @classmethod
-    def hide_and_delete(cls):
+    def close_and_delete(cls):
         if not cls.INSTANCE:
             return
-        cls.INSTANCE.hide()
+        cls.INSTANCE.close()
         cls.INSTANCE.deleteLater()
 
     def __init__(self):
@@ -138,6 +139,7 @@ class MainDialog(QtWidgets.QDialog):
                 child.save_config()
         self.close()
         self.deleteLater()
+        MainDialog.INSTANCE = None
 
     def update_configs(self):
         start_time = timeit.default_timer()
@@ -148,8 +150,8 @@ class MainDialog(QtWidgets.QDialog):
         Logger.debug("Config load time: {0}s".format(timeit.default_timer() - start_time))
 
     def closeEvent(self, event):
-        super(MainDialog, self).closeEvent(event)
         MainDialog.GEOMETRY = self.saveGeometry()
+        super(MainDialog, self).closeEvent(event)
 
 
 if __name__ == "__main__":
