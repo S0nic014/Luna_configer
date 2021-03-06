@@ -7,6 +7,9 @@ import luna.utils.devFn as devFn
 
 
 class PageWidget(QtWidgets.QWidget):
+    def __repr__(self):
+        return self.category_name
+
     def __init__(self, parent=None, category_name="Category"):
         super(PageWidget, self).__init__(parent)
         self.category_name = category_name

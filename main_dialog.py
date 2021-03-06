@@ -140,8 +140,11 @@ class MainDialog(QtWidgets.QDialog):
         start_time = timeit.default_timer()
         for child in self.stack_wgt.children():
             if isinstance(child, pages.PageWidget):
-                child.load_config()
-                Logger.debug("{0} page - loaded in: {1}s".format(child.category_name, timeit.default_timer() - start_time))
+                try:
+                    child.load_config()
+                    Logger.debug("{0} page - loaded in: {1}s".format(child, timeit.default_timer() - start_time))
+                except Exception:
+                    Logger.exception("Failed to load config for {0}".format(child))
         Logger.debug("Config load time: {0}s".format(timeit.default_timer() - start_time))
 
     def closeEvent(self, event):
