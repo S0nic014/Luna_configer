@@ -34,7 +34,6 @@ class MainDialog(QtWidgets.QDialog):
         if not cls.INSTANCE:
             return
         cls.INSTANCE.close()
-        cls.INSTANCE.deleteLater()
 
     def __init__(self):
         super(MainDialog, self).__init__(parent=pysideFn.maya_main_window())
@@ -42,6 +41,7 @@ class MainDialog(QtWidgets.QDialog):
         self.setObjectName(self.__class__.UI_NAME)
         self.setWindowTitle(self.WINDOW_TITLE)
         self.setMinimumSize(*self.MINIMUM_SIZE)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setMaximumHeight(600)
         # MacOSX window stay on top
         self.setProperty("saveWindowPref", True)
@@ -54,9 +54,6 @@ class MainDialog(QtWidgets.QDialog):
         self.create_layouts()
         self.create_connections()
         self.update_configs()
-
-        # Load geo and show
-        self.restoreGeometry(MainDialog.GEOMETRY)
 
     def create_actions(self):
         self.reset_configs_action = QtWidgets.QAction("Restore default config", self)
@@ -138,8 +135,6 @@ class MainDialog(QtWidgets.QDialog):
             if isinstance(child, pages.PageWidget):
                 child.save_config()
         self.close()
-        self.deleteLater()
-        MainDialog.INSTANCE = None
 
     def update_configs(self):
         start_time = timeit.default_timer()
@@ -151,6 +146,7 @@ class MainDialog(QtWidgets.QDialog):
 
     def closeEvent(self, event):
         MainDialog.GEOMETRY = self.saveGeometry()
+        MainDialog.INSTANCE = None
         super(MainDialog, self).closeEvent(event)
 
 
