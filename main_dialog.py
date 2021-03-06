@@ -91,11 +91,13 @@ class MainDialog(QtWidgets.QDialog):
 
         # Create pages
         self.dev_page = pages.DeveloperPage()
-        self.other_page = pages.OtherPage()
+        self.rig_page = pages.RigPage()
+        self.general_page = pages.GeneralPage()
 
         # Populate stack
+        self.stack_wgt.addWidget(self.general_page)
+        self.stack_wgt.addWidget(self.rig_page)
         self.stack_wgt.addWidget(self.dev_page)
-        self.stack_wgt.addWidget(self.other_page)
 
         # Populate category
         stack_children = self.stack_wgt.children()  # type: list
