@@ -215,6 +215,7 @@ class RigPage(PageWidget):
 
         # Misc
         self.misc_grp = QtWidgets.QGroupBox("Miscellaneous")
+        self.misc_line_width = shared_widgets.NumericFieldWidget("Line width", data_type="double", default_value=2.0, min_value=-1.0)
 
     def create_layouts(self):
         super(RigPage, self).create_layouts()
@@ -229,6 +230,10 @@ class RigPage(PageWidget):
         file_formats_layout.addRow("Skin files:", self.file_formats_skin_combobox)
         file_formats_layout.addRow("ngLayers files:", self.file_formats_nglayers_combobox)
         self.file_formats_grp.setLayout(file_formats_layout)
+
+        misc_layout = QtWidgets.QFormLayout()
+        misc_layout.addRow(self.misc_line_width)
+        self.misc_grp.setLayout(misc_layout)
 
         self.main_layout.addWidget(self.naming_grp)
         self.main_layout.addWidget(self.file_formats_grp)
@@ -251,6 +256,8 @@ class RigPage(PageWidget):
         # File formats
         self.file_formats_skin_combobox.setCurrentText(config_dict.get(luna.RigVars.skin_export_format, "pickle"))
         self.file_formats_nglayers_combobox.setCurrentText(config_dict.get(luna.RigVars.nglayers_export_format, "pickle"))
+        # Misc
+        self.misc_line_width.set_value(config_dict.get(luna.RigVars.line_width, 2.0))
 
     def save_config(self):
         luna.Logger.debug("Rig page - saving config...")
@@ -261,6 +268,7 @@ class RigPage(PageWidget):
         new_config[luna.NamingVars.index_padding] = self.naming_index_padding.spin_box.value()
         new_config[luna.RigVars.skin_export_format] = self.file_formats_skin_combobox.currentText()
         new_config[luna.RigVars.nglayers_export_format] = self.file_formats_nglayers_combobox.currentText()
+        new_config[luna.RigVars.line_width] = self.misc_line_width.value()
 
         luna.Config.update(new_config)
         luna.Logger.debug("Rig page - saved config: {0}".format(new_config))
