@@ -3,7 +3,10 @@ from PySide2 import QtCore
 import luna
 import luna.interface.shared_widgets as shared_widgets
 import luna.interface.hud as hud
+import luna.interface.marking_menu as marking_menu
 import luna.utils.devFn as devFn
+import luna_rig
+import luna_rig.functions.nameFn as nameFn
 
 
 class PageWidget(QtWidgets.QWidget):
@@ -187,6 +190,8 @@ class GeneralPage(PageWidget):
         # Hud recreate
         luna.Logger.info("Updating HUD...")
         hud.LunaHUD.create()
+        # Apply marking menu mode
+        marking_menu.MarkingMenu.MODE = self.marking_mode_combobox.currentIndex()
 
 
 class RigPage(PageWidget):
@@ -272,6 +277,14 @@ class RigPage(PageWidget):
 
         luna.Config.update(new_config)
         luna.Logger.debug("Rig page - saved config: {0}".format(new_config))
+
+        # Update cached Naming convention class fields
+        nameFn.NamingConvention.START_INDEX = self.naming_start_index.spin_box.value()
+        nameFn.NamingConvention.ZFILL = self.naming_index_padding.spin_box.value()
+        nameFn.NamingConvention.ALL_TEMPLATES = self.get_naming_templates_dict()
+        nameFn.NamingConvention.CURRENT_TEMPLATE_NAME = self.naming_current_template.line_edit.text()
+        # Update control class Fields
+        luna_rig.Control.LINE_WIDTH = self.misc_line_width.value()
 
     def update_templates_table(self, templates_dict):
         self.naming_templates_table.setRowCount(0)

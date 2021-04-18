@@ -35,6 +35,8 @@ class MainDialog(QtWidgets.QDialog):
         if not cls.INSTANCE:
             return
         cls.INSTANCE.close()
+        cls.INSTANCE.deleteLater()
+        cls.INSTANCE = None
 
     def __init__(self):
         super(MainDialog, self).__init__(parent=pysideFn.maya_main_window())
