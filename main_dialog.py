@@ -1,4 +1,5 @@
 import timeit
+import imp
 from PySide2 import QtCore
 from PySide2 import QtWidgets
 from PySide2 import QtGui
@@ -7,7 +8,7 @@ from luna import Logger
 from luna import Config
 from luna_configer import pages
 from luna.utils import pysideFn
-reload(pages)
+imp.reload(pages)
 
 
 class MainDialog(QtWidgets.QDialog):
